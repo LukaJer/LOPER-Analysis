@@ -190,24 +190,3 @@ Efficinecy=MassFlow.*(IO_Enthalpy(:,2)-IO_Enthalpy(:,1))./HeaterPower;
 
 deviation=(HTC-HTC_sim_my)./HTC;
 deviation=movmean(deviation,20);
-%                 for i=1:length(tempdiff)
-%                     rem_sum=sum(tempdiff(i:end,:));
-%                     if max(abs(rem_sum))<limit
-%                         break;
-%                     end
-%                 end
-%
-%                 if i<length(app.temperature_wall) && i<0.9*length(tempdiff)
-%                     max_temp_wall=mean(app.temperature_wall(i:end,:))+limit;
-%                     min_temp_wall=mean(app.temperature_wall(i:end,:))-limit;
-%                     A=app.temperature_wall(i:end,:)<max_temp_wall;
-%                     B=app.temperature_wall(i:end,:)>min_temp_wall;
-%
-%                     C=A.*B;
-%                     if length(find(C==0))<1
-%                         app.EditField_7.Value=i/10;
-%                         return;
-%
-%                     end
-%                 end
-%                 app.EditField_7.Value=Inf;

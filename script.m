@@ -27,13 +27,12 @@ end
 %% Check if XSteam is installed
 % On Windows folder might not be added automaticaly to MATLAB Path
 addons=matlab.addons.installedAddons;
-if(~sum(contains(addons.Name, 'X Steam, Thermodynamic properties of water and steam.')) || ~exist('refpropm.m','file')) 
+if(~sum(contains(addons.Name, 'X Steam, Thermodynamic properties of water and steam.')) && ~exist('refpropm.m','file')) 
     msgbox(["ERROR!";" XSteam or refprop not found not found";"Please install"],"Error","error");
     return;
 end
 
-totalTime=max(rawData.deltaTInS);
-numPoints=height(rawData);
+
 
 pos_TC_rel=[18 150.3 149.7 149.9 200.5 50.1 49.8 49.4 51.2 49.7]/1000; % [m]
 pos_TC_abs=[18 168.3 318 467.9 668.4 718.5 768.3 817.7 868.9 918.6]/1000; % [m]
@@ -44,18 +43,23 @@ r_o=5/1000; % [m]
 heated_lenght=0.94; % [m]
 A_section=2*r_o*pi*sect_lenght; % [m2]
 
+totalTime=max(rawData.deltaTInS);
+numElAvg=10;
 
 %% Extracts KR temperature Data
 temperature_wall=table2array(rawData(:,56:66));
 %temperature_wall(:,2)=(temperature_wall(:,1)+temperature_wall(:,3))/2; %% interpolates Temperature as TC is broken
 temperature_wall(:,2)=[];
 temperature_wall=flip(temperature_wall,2); % flips so that table position matches TC position (1st column = bottom TC)
+temperature_wall=blockavg(temperature_wall,numElAvg);
 
+
+numPoints=height(temperature_wall);
 
 
 %% Extracts and smooths pressure
-IO_Pressure(:,1)=movmean(rawData.DruckVorKRInBar,10);
-IO_Pressure(:,2)=movmean(rawData.DruckNachKRInBar,10);
+IO_Pressure(:,1)=blockavg(rawData.DruckVorKRInBar,numElAvg);
+IO_Pressure(:,2)=blockavg(rawData.DruckNachKRInBar,numElAvg);
 Pressure=zeros(numPoints,10);
 for i=1:10
     Pressure(:,i)=IO_Pressure(:,1)+(IO_Pressure(:,2)-IO_Pressure(:,1))*pos_TC_abs(i);
@@ -65,16 +69,19 @@ end
 
 % Mass flow [kg/s]
 densityH20=1;
-MassFlow=densityH20*(rawData.DurchflussInL_min/60); % kg/s
+rawMassFlow=blockavg(rawData.DurchflussInL_min,numElAvg);
+MassFlow=densityH20*(rawMassFlow/60); % kg/s
 
 % Heater Power [W]
-HeaterPower=rawData.GesamtstromInA.*rawData.SpannungsabfallKRInV; % W
+rawVoltage=blockavg(rawData.SpannungsabfallKRInV,numElAvg);
+rawCurrent=blockavg(rawData.GesamtstromInA,numElAvg);
+HeaterPower=rawCurrent.*rawVoltage; % W
 
 %% Estimates Resistive Heating at each section in W
 % Uses Current and estimated Resistance of each Section
 res_Heating=zeros(numPoints,10);
 for i=1:10
-    res_Heating(:,i)=calc_elPower(rawData.GesamtstromInA,temperature_wall(:,i),sect_lenght(i));
+    res_Heating(:,i)=calc_elPower(rawCurrent,temperature_wall(:,i),sect_lenght(i));
 end
 
 % validates resistive heating with measured Power
@@ -89,11 +96,14 @@ therm_Cond=1.7*10^-8*temperature_wall.^3-3.1*10^-5*temperature_wall.^2+3.25*10^-
 temperature_wall_outside=temperature_wall-(r_o*res_Heating_flux)./(2*therm_Cond)+(res_Heating_flux*r_i^2*r_o)./(therm_Cond*(r_o^2-r_i^2))*log(r_o/r_i);
 
 %% Entalpy change over full System in kJ/kg
+rawTempIn=blockavg(rawData.TemperaturKreisringeintrittIn_C,numElAvg);
+rawTempOut=blockavg(rawData.TemperaturKreisringeintrittIn_C,numElAvg);
+
 IO_Enthalpy=zeros(numPoints,2);
 if ispc
     for i=1:numPoints %needs to be looped refprop/XSteam don't accept vectors
-        IO_Enthalpy(i,1)=refpropm('H','T',rawData.TemperaturKreisringeintrittIn_C(i)+273.15,'P',Pressure(i,1)*100,'Water')/1000;
-        IO_Enthalpy(i,2)=refpropm('H','T',rawData.TemperaturKreisringaustrittIn_C(i)+273.15,'P',Pressure(i,2)*100,'Water')/1000;
+        IO_Enthalpy(i,1)=refpropm('H','T',rawTempIn(i)+273.15,'P',Pressure(i,1)*100,'Water')/1000;
+        IO_Enthalpy(i,2)=refpropm('H','T',rawTempOut(i)+273.15,'P',Pressure(i,2)*100,'Water')/1000;
     end
 else
     for i=1:numPoints %needs to be looped refprop/XSteam don't accept vectors

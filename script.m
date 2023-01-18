@@ -32,6 +32,18 @@ if(~sum(contains(addons.Name, 'X Steam, Thermodynamic properties of water and st
     return;
 end
 
+prompt = {'Average over n Seconds'};
+dlgtitle = 'Average';
+dims = [1 40];
+definput = {'10'};
+answer = inputdlg(prompt,dlgtitle,dims,definput);
+
+if isempty(answer)
+    return;
+end
+
+deltaT=str2double(answer{1});
+numElAvg=1/0.1*deltaT;
 
 
 pos_TC_rel=[18 150.3 149.7 149.9 200.5 50.1 49.8 49.4 51.2 49.7]/1000; % [m]
@@ -44,7 +56,8 @@ heated_lenght=0.94; % [m]
 A_section=2*r_o*pi*sect_lenght; % [m2]
 
 totalTime=max(rawData.deltaTInS);
-numElAvg=10;
+
+
 
 %% Extracts KR temperature Data
 temperature_wall=table2array(rawData(:,56:66));
@@ -55,7 +68,7 @@ temperature_wall=blockavg(temperature_wall,numElAvg);
 
 
 numPoints=height(temperature_wall);
-
+time=linspace(0,totalTime,numPoints)';
 
 %% Extracts and smooths pressure
 IO_Pressure(:,1)=blockavg(rawData.DruckVorKRInBar,numElAvg);
@@ -76,6 +89,7 @@ MassFlow=densityH20*(rawMassFlow/60); % kg/s
 rawVoltage=blockavg(rawData.SpannungsabfallKRInV,numElAvg);
 rawCurrent=blockavg(rawData.GesamtstromInA,numElAvg);
 HeaterPower=rawCurrent.*rawVoltage; % W
+HeaterSet=blockavg(rawData.VerdampferleistungSollInW,numElAvg);
 
 %% Estimates Resistive Heating at each section in W
 % Uses Current and estimated Resistance of each Section
@@ -98,6 +112,7 @@ temperature_wall_outside=temperature_wall-(r_o*res_Heating_flux)./(2*therm_Cond)
 %% Entalpy change over full System in kJ/kg
 rawTempIn=blockavg(rawData.TemperaturKreisringeintrittIn_C,numElAvg);
 rawTempOut=blockavg(rawData.TemperaturKreisringeintrittIn_C,numElAvg);
+EnthalpyInSet=blockavg(rawData.EintrittsenthalpieInKJ_kg,numElAvg);
 
 IO_Enthalpy=zeros(numPoints,2);
 if ispc

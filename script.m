@@ -68,7 +68,7 @@ temperature_wall=blockavg(temperature_wall,numElAvg);
 
 
 numPoints=height(temperature_wall);
-time=linspace(0,totalTime,numPoints)';
+timeVect=linspace(0,totalTime,numPoints)';
 
 %% Extracts and smooths pressure
 IO_Pressure(:,1)=blockavg(rawData.DruckVorKRInBar,numElAvg);
@@ -110,20 +110,20 @@ therm_Cond=1.7*10^-8*temperature_wall.^3-3.1*10^-5*temperature_wall.^2+3.25*10^-
 temperature_wall_outside=temperature_wall-(r_o*res_Heating_flux)./(2*therm_Cond)+(res_Heating_flux*r_i^2*r_o)./(therm_Cond*(r_o^2-r_i^2))*log(r_o/r_i);
 
 %% Entalpy change over full System in kJ/kg
-rawTempIn=blockavg(rawData.TemperaturKreisringeintrittIn_C,numElAvg);
-rawTempOut=blockavg(rawData.TemperaturKreisringeintrittIn_C,numElAvg);
+IO_Temp(:,1)=blockavg(rawData.TemperaturKreisringeintrittIn_C,numElAvg);
+IO_Temp(:,2)=blockavg(rawData.TemperaturKreisringaustrittIn_C,numElAvg);
 EnthalpyInSet=blockavg(rawData.EintrittsenthalpieInKJ_kg,numElAvg);
 
 IO_Enthalpy=zeros(numPoints,2);
 if ispc
     for i=1:numPoints %needs to be looped refprop/XSteam don't accept vectors
-        IO_Enthalpy(i,1)=refpropm('H','T',rawTempIn(i)+273.15,'P',Pressure(i,1)*100,'Water')/1000;
-        IO_Enthalpy(i,2)=refpropm('H','T',rawTempOut(i)+273.15,'P',Pressure(i,2)*100,'Water')/1000;
+        IO_Enthalpy(i,1)=refpropm('H','T',IO_Temp(i,1)+273.15,'P',Pressure(i,1)*100,'Water')/1000;
+        IO_Enthalpy(i,2)=refpropm('H','T',IO_Temp(i,2)+273.15,'P',Pressure(i,2)*100,'Water')/1000;
     end
 else
     for i=1:numPoints %needs to be looped refprop/XSteam don't accept vectors
-        IO_Enthalpy(i,1)=XSteam('h_pt',IO_Pressure(i,1),rawData.TemperaturKreisringeintrittIn_C(i));
-        IO_Enthalpy(i,2)=XSteam('h_pt',IO_Pressure(i,2),rawData.TemperaturKreisringaustrittIn_C(i));
+        IO_Enthalpy(i,1)=XSteam('h_pt',IO_Pressure(i,1),IO_Temp(i,1));
+        IO_Enthalpy(i,2)=XSteam('h_pt',IO_Pressure(i,2),IO_Temp(i,2));
     end
 end
 

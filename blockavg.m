@@ -2,6 +2,11 @@ function shrinkedMat = blockavg(matrix,numEl)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
+if numEl==1 % do nothing if averaging over just 1 element
+    shrinkedMat=matrix;
+    return
+end
+
 blockSize = [numEl, 1];
 meanFilterFunction = @(theBlockStructure) mean2(theBlockStructure.data(:));
 shrinkedMat = blockproc(matrix, blockSize, meanFilterFunction);

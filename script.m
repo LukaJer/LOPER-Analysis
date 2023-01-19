@@ -43,6 +43,9 @@ if isempty(answer)
 end
 
 deltaT=str2double(answer{1});
+if deltaT<0.1
+    deltaT=0.1;
+end
 numElAvg=1/0.1*deltaT;
 
 

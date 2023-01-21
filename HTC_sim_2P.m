@@ -40,8 +40,8 @@ A=4.6885e-04; % in m2
 
 if ispc
     dynVisc=refpropm('V','P',pressure*100,'Q',0,'Water'); % [Pa*s]
-    isobaricHeatCap=refpropm('C','P',pressure*100,'T',temp_fluid+273.15,'Water'); % [J/(kg K)]
-    thermalCond=refpropm('L','P',pressure*100,'T',temp_fluid+273.15,'Water'); %  [W/(m K)]
+    isobaricHeatCap=refpropm('C','T',temp_fluid+273.15,'P',pressure*100,'Water'); % [J/(kg K)]
+    thermalCond=refpropm('L','T',temp_fluid+273.15,'P',pressure*100,'Water'); %  [W/(m K)]
 else
     dynVisc=py.CoolProp.CoolProp.PropsSI('V','P',pressure*100000,'Q',0,'Water'); % in Pa s
     isobaricHeatCap=XSteam('CpL_p',pressure)*1000 ;% in J/(kg*K)
@@ -78,8 +78,8 @@ A=4.6885e-04; % in m2
 
 if ispc
     dynVisc=refpropm('V','P',pressure*100,'Q',1,'Water'); % [Pa*s]
-    isobaricHeatCap=refpropm('C','P',pressure*100,'T',temp_fluid+273.15,'Water'); % [J/(kg K)]
-    thermalCond=refpropm('L','P',pressure*100,'T',temp_fluid+273.15,'Water'); %  [W/(m K)]
+    isobaricHeatCap=refpropm('C','T',temp_fluid+273.15,'P',pressure*100,'Water'); % [J/(kg K)]
+    thermalCond=refpropm('L','T',temp_fluid+273.15,'P',pressure*100,'Water'); %  [W/(m K)]
 else
     dynVisc=py.CoolProp.CoolProp.PropsSI('V','P',pressure*100000,'Q',1,'Water'); % in Pa s
     isobaricHeatCap=XSteam('CpL_p',pressure)*1000 ;% in J/(kg*K)

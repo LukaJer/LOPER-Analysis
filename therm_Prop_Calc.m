@@ -1,11 +1,5 @@
 function [dynVisc,isobaricHeatCap,thermalCond] = therm_Prop_Calc(pressure,temp_fluid)
-%% Calculates Re, Pr, Nu from the experimental data
-d_o=26.4/1000;
-d_i=10/1000;
-d_h=d_o-d_i;
-ratio=d_i/d_o;
-A=((d_o/2)^2-(d_i/2)^2)*pi;
-
+%% Calculates dynamic Viscosity, isobaric Heat Capacity and the thermal Conductivity of the fluid at a point
 if ispc
     dynVisc=refpropm('V','T',temp_fluid+273.15,'P',pressure*100,'Water'); % [Pa*s]
     isobaricHeatCap=refpropm('C','T',temp_fluid+273.15,'P',pressure*100,'Water'); % [J/(kg K)]

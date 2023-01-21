@@ -52,11 +52,18 @@ numElAvg=1/0.1*deltaT;
 pos_TC_rel=[18 150.3 149.7 149.9 200.5 50.1 49.8 49.4 51.2 49.7]/1000; % [m]
 pos_TC_abs=[18 168.3 318 467.9 668.4 718.5 768.3 817.7 868.9 918.6]/1000; % [m]
 sect_lenght=[93.15 150 149.8 175.2 125.3 49.95 49.6 50.3 50.45 46.25]/1000; % [m]
-pos_frac=[0.1932 0.501 0.4997 0.4278 0.8001 0.5015 0.502 0.4911 0.5074 0.5373]; % [m]
+pos_frac=[0.1932 0.501 0.4997 0.4278 0.8001 0.5015 0.502 0.4911 0.5074 0.5373];
 r_i=4/1000; % [m]
 r_o=5/1000; % [m]
 heated_lenght=0.94; % [m]
 A_section=2*r_o*pi*sect_lenght; % [m2]
+
+d_o=26.4/1000;
+d_i=10/1000;
+d_h=d_o-d_i;
+ratio=d_i/d_o;
+A_h=((d_o/2)^2-(d_i/2)^2)*pi;
+totallength=0.94;
 
 totalTime=max(rawData.deltaTInS);
 
@@ -76,10 +83,7 @@ timeVect=linspace(0,totalTime,numPoints)';
 %% Extracts and smooths pressure
 IO_Pressure(:,1)=blockavg(rawData.DruckVorKRInBar,numElAvg);
 IO_Pressure(:,2)=blockavg(rawData.DruckNachKRInBar,numElAvg);
-Pressure=zeros(numPoints,10);
-for i=1:10
-    Pressure(:,i)=IO_Pressure(:,1)+(IO_Pressure(:,2)-IO_Pressure(:,1))*pos_TC_abs(i);
-end
+Pressure=IO_Pressure(:,1)+(IO_Pressure(:,2)-IO_Pressure(:,1)).*pos_TC_abs;
 
 %% Various Computations
 
@@ -89,20 +93,20 @@ rawMassFlow=blockavg(rawData.DurchflussInL_min,numElAvg);
 MassFlow=densityH20*(rawMassFlow/60); % kg/s
 
 % Heater Power [W]
-rawVoltage=blockavg(rawData.SpannungsabfallKRInV,numElAvg);
-rawCurrent=blockavg(rawData.GesamtstromInA,numElAvg);
-HeaterPower=rawCurrent.*rawVoltage; % W
+Voltage=blockavg(rawData.SpannungsabfallKRInV,numElAvg);
+Current=blockavg(rawData.GesamtstromInA,numElAvg);
+HeaterPower=Current.*Voltage; % W
 HeaterSet=blockavg(rawData.VerdampferleistungSollInW,numElAvg);
 
 %% Estimates Resistive Heating at each section in W
 % Uses Current and estimated Resistance of each Section
 res_Heating=zeros(numPoints,10);
 for i=1:10
-    res_Heating(:,i)=calc_elPower(rawCurrent,temperature_wall(:,i),sect_lenght(i));
+    res_Heating(:,i)=calc_elPower(Current,temperature_wall(:,i),sect_lenght(i));
 end
 
 % validates resistive heating with measured Power
-resHeating_sum=sum(res_Heating,2); % Validity check, not used;
+resHeating_sum=sum(res_Heating,2);
 resHeating_corrFac=HeaterPower./resHeating_sum;
 res_Heating=resHeating_corrFac.*res_Heating;
 resHeating_sum=sum(res_Heating,2);
@@ -129,6 +133,10 @@ else
         IO_Enthalpy(i,2)=XSteam('h_pt',IO_Pressure(i,2),IO_Temp(i,2));
     end
 end
+
+%% Total Energy Balance
+Q_loss=HeaterPower-1000.*MassFlow.*(IO_Enthalpy(:,2)-IO_Enthalpy(:,1));
+Efficinecy=MassFlow.*(IO_Enthalpy(:,2)-IO_Enthalpy(:,1))./HeaterPower;
 
 %% enthalpy calculations in kJ/kg
 %Enthalpy at each position
@@ -172,49 +180,36 @@ end
 
 
 %% Heat Transfer Coefficient Calculation in W/(m2*K)
+HTC=res_Heating_flux./(temperature_wall_outside-temperature_fluid);
 
-HTC=zeros(numPoints,10);
-for i=1:10
-    HTC(:,i)=res_Heating_flux(:,i)./(temperature_wall_outside(:,i)-temperature_fluid(:,i));
+%% Computation of thermodynamic Properties
+dynVisc=zeros(numPoints,10);
+isobaricHeatCap=zeros(numPoints,10);
+thermalCond=zeros(numPoints,10);
+for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
+    for i=1:numPoints 
+        if VapourFrac(i,j)<=0
+        [dynVisc(i,j), isobaricHeatCap(i,j), thermalCond(i,j)]=therm_Prop_Calc(Pressure(i,j),temperature_fluid(i,j));
+        end
+    end
 end
+Nu_exp=HTC.*d_h./thermalCond;
+Pr_exp=dynVisc.*isobaricHeatCap./thermalCond;
+Re_exp=MassFlow.*d_h./(dynVisc*A_h);
 
+%% Simulation of HTC
 HTC_sim=zeros(numPoints,10);
 for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
     for i=1:numPoints 
         if VapourFrac(i,j)<=0
-            HTC_sim(i,j)=HTC_sim_1P(MassFlow(i),Pressure(i,j),temperature_fluid(i,j),temperature_wall(i,j),pos_TC_abs(j));
+            HTC_sim(i,j)=HTC_sim_1P(Pressure(i,j),temperature_wall(i,j),thermalCond(i,j),Re_exp(i,j),Pr_exp(i,j),pos_TC_abs(j));
         else
             HTC_sim(i,j)=HTC_sim_2P(temperature_fluid(i,j),Pressure(i,j),res_Heating(i,j),VapourFrac(i,j),pos_TC_abs(j),MassFlow(i));
         end
     end
 end
 
+%% Nusslet Number from LeastSquares Approach
 x=[5.194725261478277,0.479405851735662,-0.869964261707776,-0.206645169972858];
-
-HTC_sim_my=zeros(numPoints,10);
-for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
-    for i=1:numPoints 
-        if ~VapourFrac(i,j)
-            HTC_sim_my(i,j)=HTC_Calc_1P_my(MassFlow(i),Pressure(i,j),temperature_fluid(i,j),temperature_wall(i,j),pos_TC_abs(j),x);
-        end
-    end
-end
-
-Re_exp=zeros(numPoints,10);
-Pr_exp=zeros(numPoints,10);
-Nu_exp=zeros(numPoints,10);
-
-for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
-    for i=1:numPoints 
-        if VapourFrac(i,j)<=0
-        [Pr_exp(i,j), Re_exp(i,j), Nu_exp(i,j)]=Pr_Re_Nu_calc(Pressure(i,j),temperature_fluid(i,j),MassFlow(i),HTC(i,j));
-        end
-    end
-end
-
-Q_loss=HeaterPower-1000.*MassFlow.*(IO_Enthalpy(:,2)-IO_Enthalpy(:,1));
-Efficinecy=MassFlow.*(IO_Enthalpy(:,2)-IO_Enthalpy(:,1))./HeaterPower;
-
-
-deviation=(HTC-HTC_sim_my)./HTC;
-deviation=movmean(deviation,20);
+Nu_sim_my=x(1)*Re_exp.^x(2).*Pr_exp.^x(3).*pos_TC_abs.^x(4);
+HTC_sim_my=Nu_sim_my.*thermalCond/d_h;

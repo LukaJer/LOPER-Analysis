@@ -1,4 +1,4 @@
- function HTC=HTC_sim_1P(massflow,pressure,temp_fluid,temp_wall,pos)
+ function HTC=HTC_sim_1P(pressure,temp_wall,thermalCond,Re,Pr,pos)
 d_o=26.4/1000;
 d_i=10/1000;
 d_h=d_o-d_i;
@@ -8,31 +8,16 @@ totallength=0.94;
 
 
 if ispc
-    dynVisc=refpropm('V','T',temp_fluid+273.15,'P',pressure*100,'Water'); % [Pa*s]
-    isobaricHeatCap=refpropm('C','T',temp_fluid+273.15,'P',pressure*100,'Water'); % [J/(kg K)]
-    thermalCond=refpropm('L','T',temp_fluid+273.15,'P',pressure*100,'Water'); %  [W/(m K)]
-
     dynVisc_w=refpropm('V','T',temp_wall+273.15,'P',pressure*100,'Water');
     isobaricHeatCap_w=refpropm('C','T',temp_wall+273.15,'P',pressure*100,'Water');
     thermalCond_w=refpropm('L','T',temp_wall+273.15,'P',pressure*100,'Water');
 else
-    dynVisc=XSteam('my_pT',pressure,temp_fluid); % in N*s/m2
-    isobaricHeatCap=XSteam('Cp_pT',pressure,temp_fluid)*1000 ;% in J/(kg*K)
-    thermalCond=XSteam('tc_pT',pressure,temp_fluid); % W/(m*K)
-
     dynVisc_w=XSteam('my_pT',pressure,temp_wall);
     isobaricHeatCap_w=XSteam('Cp_pT',pressure,temp_wall)*1000;
     thermalCond_w=XSteam('tc_pT',pressure,temp_wall);
-if isnan(dynVisc)
-    dynVisc=py.CoolProp.CoolProp.PropsSI('V','T',temp_fluid+273,'P',pressure*100000,'Water');
 end
 
-end
-
-
-Pr=dynVisc*isobaricHeatCap/thermalCond;
 Pr_wall=dynVisc_w*isobaricHeatCap_w/thermalCond_w;
-Re=massflow*d_h/(dynVisc*A);
 
     if (Re<2300)
         %% VDI annular, only for const. T!

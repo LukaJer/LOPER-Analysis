@@ -91,8 +91,9 @@ Pressure=Pressure_IO(:,1)+(Pressure_IO(:,2)-Pressure_IO(:,1)).*pos_TC_abs;
 
 % Mass flow [kg/s]
 densityH20=1;
-rawMassFlow=blockavg(rawData.DurchflussInL_min,numElAvg);
-MassFlow=densityH20*(rawMassFlow/60); % kg/s
+MassFlow=blockavg(rawData.DurchflussInL_min,numElAvg);
+MassFlow=densityH20*(MassFlow/60); % kg/s
+clear densityH20
 
 % Heater Power [W]
 Voltage=blockavg(rawData.SpannungsabfallKRInV,numElAvg);
@@ -164,7 +165,7 @@ else
     end
 end
 
-%% Computes Vapour Fraction
+%% Computes Vapour Fraction10
 VapourFrac=zeros(numPoints,10);
 if ispc
     for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
@@ -215,3 +216,5 @@ end
 x=[5.194725261478277,0.479405851735662,-0.869964261707776,-0.206645169972858];
 Nu_sim_my=x(1)*Re_exp.^x(2).*Pr_exp.^x(3).*pos_TC_abs.^x(4);
 HTC_sim_my=Nu_sim_my.*thermCond/d_h;
+
+clear i j

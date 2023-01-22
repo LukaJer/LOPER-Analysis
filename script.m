@@ -27,12 +27,19 @@ clear NewStart
 
 %% Check if XSteam or refprop is installed
 % On Windows folder might not be added automaticaly to MATLAB Path
-addons=matlab.addons.installedAddons;
-if(~sum(contains(addons.Name, 'X Steam, Thermodynamic properties of water and steam.')) && ~exist('refpropm.m','file')) 
-    msgbox(["ERROR!";" XSteam or refprop not found not found";"Please install"],"Error","error");
-    return;
+if ispc
+    if ~exist('refpropm.m','file')
+        msgbox(["ERROR!";"refprop not found";"Please add to path or install"],"Error","error");
+        return;
+    end
+else
+    addons=matlab.addons.installedAddons;
+    if~sum(contains(addons.Name, 'X Steam, Thermodynamic properties of water and steam.'))
+        msgbox(["ERROR!";" XSteam not found";"Please install"],"Error","error");
+        return;
+    end
+    clear addons
 end
-clear addons
 
 prompt = {'Average over n Seconds'};
 dlgtitle = 'Average';

@@ -1,5 +1,6 @@
 %%Splits multiple runs into seperate files
 clear;
+minLength=60;
 [File,Path] = uigetfile('*.csv','Select the measurement data');%open file browser
 full_Path=fullfile(Path,File);
 rawData=readtable(full_Path,"Delimiter",";"); %readsData
@@ -8,7 +9,7 @@ inName=File(1:end-4);
 NewStart(end+1)=height(rawData)+1;
 j=1;
 for i=1:length(NewStart)-1
-    if rawData.deltaTInS(NewStart(i+1)-1)>60
+    if rawData.deltaTInS(NewStart(i+1)-1)>minLength
         if j<10
             name= inName + "_0" + j + ".csv";
         else

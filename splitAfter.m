@@ -1,4 +1,4 @@
-startTime = find(str2double(cell2mat(splitTime))==rawData.deltaTInS);
+startTime = find(splitTime==rawData.deltaTInS);
 j=0;
 full_Path_split=full_Path;
 while exist(full_Path_split,'file')

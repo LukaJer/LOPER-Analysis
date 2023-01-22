@@ -39,7 +39,7 @@ dlgtitle = 'Average';
 dims = [1 40];
 definput = {'10'};
 answer = inputdlg(prompt,dlgtitle,dims,definput);
-clear prompt dlgtitlem dimsm definputm 
+clear prompt dlgtitle dims definput
 
 if isempty(answer)
     return;

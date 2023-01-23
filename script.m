@@ -136,10 +136,15 @@ if ispc
     for i=1:numPoints %needs to be looped refprop/XSteam don't accept vectors
         Enthalpy_IO(i,1)=refpropm('H','T',Temp_fluid_IO(i,1)+273.15,'P',Pressure_IO(i,1)*100,'Water')/1000;
         Enthalpy_IO(i,2)=refpropm('H','T',Temp_fluid_IO(i,2)+273.15,'P',Pressure_IO(i,2)*100,'Water')/1000;
+
     end
 else
     for i=1:numPoints %needs to be looped refprop/XSteam don't accept vectors
         Enthalpy_IO(i,1)=XSteam('h_pt',Pressure_IO(i,1),Temp_fluid_IO(i,1));
+        if isnan(Enthalpy_IO(i,2))
+            Enthalpy_IO(i,2)=py.CoolProp.CoolProp.PropsSI('H','T',temp_fluid+273,'P',pressure*100000,'Water');
+        end
+
         Enthalpy_IO(i,2)=XSteam('h_pt',Pressure_IO(i,2),Temp_fluid_IO(i,2));
     end
 end
@@ -160,13 +165,13 @@ end
 Temp_fluid=zeros(numPoints,10);
 if ispc
     for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
-        for i=1:numPoints 
+        for i=1:numPoints
             Temp_fluid(i,j)=refpropm('T','P',Pressure(i,j)*100,'H',Enthalpy(i,j)*1000,'Water')-273.15;
         end
     end
 else
     for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
-        for i=1:numPoints 
+        for i=1:numPoints
             Temp_fluid(i,j)=XSteam('T_ph',Pressure(i,j),Enthalpy(i,j));
         end
     end
@@ -197,9 +202,9 @@ dynVisc=zeros(numPoints,10);
 isobHeatCap=zeros(numPoints,10);
 thermCond=zeros(numPoints,10);
 for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
-    for i=1:numPoints 
+    for i=1:numPoints
         if VapourFrac(i,j)<=0
-        [dynVisc(i,j), isobHeatCap(i,j), thermCond(i,j)]=therm_Prop_Calc(Pressure(i,j),Temp_fluid(i,j));
+            [dynVisc(i,j), isobHeatCap(i,j), thermCond(i,j)]=therm_Prop_Calc(Pressure(i,j),Temp_fluid(i,j));
         end
     end
 end
@@ -210,7 +215,7 @@ Re_exp=MassFlow.*d_h./(dynVisc*A_h);
 %% Simulation of HTC
 HTC_sim=zeros(numPoints,10);
 for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
-    for i=1:numPoints 
+    for i=1:numPoints
         if VapourFrac(i,j)<=0
             HTC_sim(i,j)=HTC_sim_1P(Pressure(i,j),Temp_wall(i,j),thermCond(i,j),Re_exp(i,j),Pr_exp(i,j),pos_TC_abs(j));
         else

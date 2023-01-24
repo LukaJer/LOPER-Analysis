@@ -9,8 +9,8 @@ d_h=d_o-d_i;
 A=((d_o/2)^2-(d_i/2)^2)*pi;
 
 if ispc
-    dynVisc=refpropm('V','T',temp_fluid+273.15,'P',pressure*100,'Water'); % [Pa*s]
-    isobaricHeatCap=refpropm('C','T',temp_fluid+273.15,'P',pressure*100,'Water'); % [J/(kg K)]
+    dynVisc=refpropm('V','T',temp_wall_outside+273.15,'P',pressure*100,'Water'); % [Pa*s]
+    isobaricHeatCap=refpropm('C','T',temp_wall_outside+273.15,'P',pressure*100,'Water'); % [J/(kg K)]
     thermalCond=refpropm('L','T',temp_fluid+273.15,'P',pressure*100,'Water'); %  [W/(m K)]
 else
 dynVisc=py.CoolProp.CoolProp.PropsSI('V','P',pressure*100000,'Q',0,'Water'); % in Pa s

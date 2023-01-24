@@ -185,6 +185,7 @@ if ispc
             VapourFrac(i,j)=refpropm('Q','P',Pressure(i,j)*100,'H',Enthalpy(i,j)*1000,'Water');
         end
     end
+    VapourFrac(VapourFrac<0)=0; %sets te Vapor Fraction of subcooled water to 0
 else
     for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
         for i=1:numPoints %%needs to be looped as XSteam doesn't accept vectors
@@ -203,9 +204,9 @@ isobHeatCap=zeros(numPoints,10);
 thermCond=zeros(numPoints,10);
 for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
     for i=1:numPoints
-        if VapourFrac(i,j)<=0
+        
             [dynVisc(i,j), isobHeatCap(i,j), thermCond(i,j)]=therm_Prop_Calc(Pressure(i,j),Temp_fluid(i,j));
-        end
+        
     end
 end
 Nu_exp=HTC.*d_h./thermCond;
@@ -214,12 +215,14 @@ Re_exp=MassFlow.*d_h./(dynVisc*A_h);
 
 %% Simulation of HTC
 HTC_sim=zeros(numPoints,10);
+HTC_sim_v2=zeros(numPoints,10);
 for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
     for i=1:numPoints
-        if VapourFrac(i,j)<=0
+        if ~VapourFrac(i,j)
             HTC_sim(i,j)=HTC_sim_1P(Pressure(i,j),Temp_wall(i,j),thermCond(i,j),Re_exp(i,j),Pr_exp(i,j),pos_TC_abs(j));
         else
             HTC_sim(i,j)=HTC_sim_2P(Temp_fluid(i,j),Pressure(i,j),res_Heating(i,j),VapourFrac(i,j),pos_TC_abs(j),MassFlow(i));
+            HTC_sim_v2(i,j)=HTC_sim_2P_v2(Pressure(i,j),VapourFrac(i,j),Temp_wall_outside(i,j),MassFlow(i));
         end
     end
 end

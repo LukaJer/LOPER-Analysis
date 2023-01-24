@@ -1,5 +1,5 @@
-%%Splits converts TXT file into CSV and replaces , (comma) with . (dot) and
-%%split into singele runs
+%%Converts TXT file into CSV and replaces , (comma) with . (dot) and
+% split it into singele runs
 clear;
 Data = uigetfile('*.txt','Select the measurement data');%open file browser
 varNames={'deltaTInS','DurchflussInL_min','EintrittsenthalpieInKJ_kg','LeistungDerVorheizungInW',...

@@ -9,14 +9,14 @@ d_h=d_o-d_i;
 A=((d_o/2)^2-(d_i/2)^2)*pi;
 
 if ispc
-    dynVisc=refpropm('V','T',temp_wall_outside+273.15,'P',pressure*100,'Water'); % [Pa*s]
-    isobaricHeatCap=refpropm('C','T',temp_wall_outside+273.15,'P',pressure*100,'Water'); % [J/(kg K)]
-    thermalCond=refpropm('L','T',temp_fluid+273.15,'P',pressure*100,'Water'); %  [W/(m K)]
+    dynVisc=refpropm('V','P',pressure*100,'Q',0,'Water'); % in Pa s
+    isobaricHeatCap=refpropm('C','P',pressure*100,'Q',0,'Water'); % [J/(kg K)]
+    thermalCond=refpropm('L','P',pressure*100,'Q',0,'Water'); % [W/(m K)]
 else
-dynVisc=py.CoolProp.CoolProp.PropsSI('V','P',pressure*100000,'Q',0,'Water'); % in Pa s
-isobaricHeatCap=py.CoolProp.CoolProp.PropsSI('C','P',pressure*100000,'Q',0,'Water'); % [J/(kg K)]
-thermalCond=py.CoolProp.CoolProp.PropsSI('L','P',pressure*100000,'Q',0,'Water'); % [W/(m K)]
-p_sat=XSteam('psat_T',temp_wall_outside);
+    dynVisc=py.CoolProp.CoolProp.PropsSI('V','P',pressure*100000,'Q',0,'Water'); % in Pa s
+    isobaricHeatCap=py.CoolProp.CoolProp.PropsSI('C','P',pressure*100000,'Q',0,'Water'); % [J/(kg K)]
+    thermalCond=py.CoolProp.CoolProp.PropsSI('L','P',pressure*100000,'Q',0,'Water'); % [W/(m K)]
+    p_sat=XSteam('psat_T',temp_wall_outside);
 end
 Pr_l=dynVisc*isobaricHeatCap/thermalCond;
 Re_l0=massflow*d_h/(dynVisc*A)*(1-vapourFrac);

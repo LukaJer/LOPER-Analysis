@@ -210,7 +210,7 @@ thermCond=zeros(numPoints,10);
 for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
     for i=1:numPoints
         
-            [dynVisc(i,j), isobHeatCap(i,j), thermCond(i,j)]=therm_Prop_Calc(Pressure(i,j),Temp_fluid(i,j));
+            [dynVisc(i,j), isobHeatCap(i,j), thermCond(i,j)]=therm_Prop_Calc(Pressure(i,j),Temp_fluid(i,j),VapourFrac(i,j));
         
     end
 end
@@ -220,21 +220,21 @@ Re_exp=MassFlow.*d_h./(dynVisc*A_h);
 
 %% Simulation of HTC
 HTC_sim=zeros(numPoints,10);
-%HTC_sim_v2=zeros(numPoints,10);
+HTC_sim_v2=zeros(numPoints,10);
 for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
     for i=1:numPoints
         if ~VapourFrac(i,j)
             HTC_sim(i,j)=HTC_sim_1P(Pressure(i,j),Temp_wall(i,j),thermCond(i,j),Re_exp(i,j),Pr_exp(i,j),pos_TC_abs(j));
         else
             HTC_sim(i,j)=HTC_sim_2P(Temp_fluid(i,j),Pressure(i,j),res_Heating(i,j),VapourFrac(i,j),pos_TC_abs(j),MassFlow(i));
-            %HTC_sim_v2(i,j)=HTC_sim_2P_v2(Pressure(i,j),VapourFrac(i,j),Temp_wall_outside(i,j),MassFlow(i));
+            HTC_sim_v2(i,j)=HTC_sim_2P_v2(Pressure(i,j),VapourFrac(i,j),Temp_wall_outside(i,j),MassFlow(i));
         end
     end
 end
 
 %% Nusslet Number from LeastSquares Approach
-x=[5.194725261478277,0.479405851735662,-0.869964261707776,-0.206645169972858];
-Nu_sim_my=x(1)*Re_exp.^x(2).*Pr_exp.^x(3).*pos_TC_abs.^x(4);
-HTC_sim_my=Nu_sim_my.*thermCond/d_h;
+% x=[5.194725261478277,0.479405851735662,-0.869964261707776,-0.206645169972858];
+% Nu_sim_my=x(1)*Re_exp.^x(2).*Pr_exp.^x(3).*pos_TC_abs.^x(4);
+% HTC_sim_my=Nu_sim_my.*thermCond/d_h;
 
 clear i j

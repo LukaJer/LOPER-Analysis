@@ -1,3 +1,21 @@
+if ~exist('GUI','var')
+    clear
+
+%% Check if XSteam or refprop is installed
+% On Windows folder might not be added automaticaly to MATLAB Path
+if ispc
+    if ~exist('refpropm.m','file')
+        msgbox(["ERROR!";"refprop not found";"Please add to path or install"],"Error","error");
+        return;
+    end
+else
+    addons=matlab.addons.installedAddons;
+    if~sum(contains(addons.Name, 'X Steam, Thermodynamic properties of water and steam.'))
+        msgbox(["ERROR!";" XSteam not found";"Please install"],"Error","error");
+        return;
+    end
+    clear addons
+end
 
 
 [File,Path] = uigetfile('*.csv','Select the measurement data');%open file browser
@@ -24,23 +42,9 @@ if (length(NewStart)>1)
     return;
 end
 clear NewStart
-
-%% Check if XSteam or refprop is installed
-% On Windows folder might not be added automaticaly to MATLAB Path
-if ispc
-    if ~exist('refpropm.m','file')
-        msgbox(["ERROR!";"refprop not found";"Please add to path or install"],"Error","error");
-        return;
-    end
-else
-    addons=matlab.addons.installedAddons;
-    if~sum(contains(addons.Name, 'X Steam, Thermodynamic properties of water and steam.'))
-        msgbox(["ERROR!";" XSteam not found";"Please install"],"Error","error");
-        return;
-    end
-    clear addons
 end
 
+%% Asks for Averaging Timespan
 prompt = {'Average over n Seconds'};
 dlgtitle = 'Average';
 dims = [1 40];
@@ -59,6 +63,8 @@ end
 clear answer
 numElAvg=1/0.1*deltaT;
 
+
+%% Definitions
 pos_TC_rel=[18 150.3 149.7 149.9 200.5 50.1 49.8 49.4 51.2 49.7]/1000; % [m]
 pos_TC_abs=[18 168.3 318 467.9 668.4 718.5 768.3 817.7 868.9 918.6]/1000; % [m]
 sect_lenght=[93.15 150 149.8 175.2 125.3 49.95 49.6 50.3 50.45 46.25]/1000; % [m]
@@ -67,11 +73,11 @@ r_i=4/1000; % [m]
 r_o=5/1000; % [m]
 heated_lenght=0.94; % [m]
 A_section=2*r_o*pi*sect_lenght; % [m2]
-d_o=26.4/1000;
-d_i=10/1000;
-d_h=d_o-d_i;
-ratio=d_i/d_o;
-A_h=((d_o/2)^2-(d_i/2)^2)*pi;
+d_gw=26.4/1000; % glass tube inner wall
+d_hw=10/1000; % heater outer wall
+d_h=d_gw-d_hw;
+ratio=d_hw/d_gw;
+A_h=((d_gw/2)^2-(d_hw/2)^2)*pi;
 totallength=0.94;
 
 totalTime=max(rawData.deltaTInS);
@@ -80,7 +86,6 @@ totalTime=max(rawData.deltaTInS);
 
 %% Extracts KR temperature Data
 Temp_wall=table2array(rawData(:,56:66));
-%Temp_wall(:,2)=(Temp_wall(:,1)+Temp_wall(:,3))/2; %% interpolates Temperature as TC is broken
 Temp_wall(:,2)=[];
 Temp_wall=flip(Temp_wall,2); % flips so that table position matches TC position (1st column = bottom TC)
 Temp_wall=blockavg(Temp_wall,numElAvg);
@@ -177,7 +182,7 @@ else
     end
 end
 
-%% Computes Vapour Fraction10
+%% Computes Vapour Fraction
 VapourFrac=zeros(numPoints,10);
 if ispc
     for j=1:10 %needs to be looped refprop/XSteam don't accept vectors

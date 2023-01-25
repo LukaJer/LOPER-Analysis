@@ -89,7 +89,7 @@ else
 end
 
 Pr=dynVisc*isobaricHeatCap/thermalCond;
-Re=massflow*D_h/(dynVisc*A)
+Re=massflow*D_h/(dynVisc*A);
 
 if (Re<2300)
     Nu=0.455*Pr^(1/3)*sqrt(Re*D_h/position);

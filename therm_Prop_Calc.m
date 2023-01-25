@@ -1,15 +1,15 @@
 function [dynVisc,isobaricHeatCap,thermalCond] = therm_Prop_Calc(pressure,temp_fluid,VapourFrac)
 %% Calculates dynamic Viscosity, isobaric Heat Capacity and the thermal Conductivity of the fluid at a point
 if ispc
-    if ~VapourFrac
+
         dynVisc=refpropm('V','T',temp_fluid+273.15,'P',pressure*100,'Water'); % [Pa*s]
         isobaricHeatCap=refpropm('C','T',temp_fluid+273.15,'P',pressure*100,'Water'); % [J/(kg K)]
         thermalCond=refpropm('L','T',temp_fluid+273.15,'P',pressure*100,'Water'); %  [W/(m K)]
-    else
-        dynVisc=refpropm('V','P',pressure*100,'Q',VapourFrac,'Water'); % in Pa s
-        isobaricHeatCap=refpropm('C','P',pressure*100,'Q',VapourFrac,'Water'); % [J/(kg K)]
-        thermalCond=refpropm('L','P',pressure*100,'Q',VapourFrac,'Water'); % [W/(m K)]
-    end
+
+%         dynVisc=refpropm('V','P',pressure*100,'Q',VapourFrac,'Water'); % in Pa s
+%         isobaricHeatCap=refpropm('C','P',pressure*100,'Q',VapourFrac,'Water'); % [J/(kg K)]
+%         thermalCond=refpropm('L','P',pressure*100,'Q',VapourFrac,'Water'); % [W/(m K)]
+
 else
     if ~VapourFrac
         dynVisc=XSteam('my_pT',pressure,temp_fluid); % in N*s/m2

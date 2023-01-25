@@ -209,11 +209,11 @@ isobHeatCap=zeros(numPoints,10);
 thermCond=zeros(numPoints,10);
 for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
     for i=1:numPoints
-        
             [dynVisc(i,j), isobHeatCap(i,j), thermCond(i,j)]=therm_Prop_Calc(Pressure(i,j),Temp_fluid(i,j),VapourFrac(i,j));
-        
     end
 end
+
+%% Dimensionless Numbers
 Nu_exp=HTC.*d_h./thermCond;
 Pr_exp=dynVisc.*isobHeatCap./thermCond;
 Re_exp=MassFlow.*d_h./(dynVisc*A_h);

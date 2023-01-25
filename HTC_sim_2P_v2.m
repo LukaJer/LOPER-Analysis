@@ -12,6 +12,7 @@ if ispc
     dynVisc=refpropm('V','P',pressure*100,'Q',0,'Water'); % in Pa s
     isobaricHeatCap=refpropm('C','P',pressure*100,'Q',0,'Water'); % [J/(kg K)]
     thermalCond=refpropm('L','P',pressure*100,'Q',0,'Water'); % [W/(m K)]
+    p_sat=refpropm('P','T',273.15+150,'Q',0,'Water')/100;
 else
     dynVisc=py.CoolProp.CoolProp.PropsSI('V','P',pressure*100000,'Q',0,'Water'); % in Pa s
     isobaricHeatCap=py.CoolProp.CoolProp.PropsSI('C','P',pressure*100000,'Q',0,'Water'); % [J/(kg K)]

@@ -126,10 +126,10 @@ resHeating_corrFac=HeaterPower./resHeating_sum;
 res_Heating=resHeating_corrFac.*res_Heating;
 resHeating_sum=sum(res_Heating,2);
 % calculates heat flux [ W/(m2*K) ]
-res_Heating_flux=res_Heating./A_section;
+Heat_flux=res_Heating./A_section;
 
 thermCond_Steel=1.7*10^-8*Temp_wall.^3-3.1*10^-5*Temp_wall.^2+3.25*10^-2*Temp_wall+7.52;
-Temp_wall_outside=Temp_wall-(r_o*res_Heating_flux)./(2*thermCond_Steel)+(res_Heating_flux*r_i^2*r_o)./(thermCond_Steel*(r_o^2-r_i^2))*log(r_o/r_i);
+Temp_wall_outside=Temp_wall-(r_o*Heat_flux)./(2*thermCond_Steel)+(Heat_flux*r_i^2*r_o)./(thermCond_Steel*(r_o^2-r_i^2))*log(r_o/r_i);
 
 %% Entalpy change over full System in kJ/kg
 Temp_fluid_IO(:,1)=blockavg(rawData.TemperaturKreisringeintrittIn_C,numElAvg);
@@ -201,7 +201,7 @@ end
 
 
 %% Heat Transfer Coefficient Calculation in W/(m2*K)
-HTC=res_Heating_flux./(Temp_wall_outside-Temp_fluid);
+HTC=Heat_flux./(Temp_wall_outside-Temp_fluid);
 
 %% Computation of thermodynamic Properties
 dynVisc=zeros(numPoints,10);

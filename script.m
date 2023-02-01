@@ -85,14 +85,15 @@ totalTime=max(rawData.deltaTInS);
 
 
 %% Extracts KR temperature Data
-Temp_wall=table2array(rawData(:,56:66));
+Temp_wall=table2array(rawData(:,56:66)); 
 Temp_wall(:,2)=[];
 Temp_wall=flip(Temp_wall,2); % flips so that table position matches TC position (1st column = bottom TC)
 Temp_wall=blockavg(Temp_wall,numElAvg);
 
-
-numPoints=height(Temp_wall);
-timeVect=linspace(0,totalTime,numPoints)';
+%% #sections are taken from #columns in Temp_wall
+numPoints=height(Temp_wall); % #time-steps
+numSect=width(Temp_wall); % #sections or #TCs
+timeVect=linspace(0,totalTime,numPoints)'; % creates new time vector 
 
 %% Extracts and smooths pressure
 Pressure_IO(:,1)=blockavg(rawData.DruckVorKRInBar,numElAvg);
@@ -115,8 +116,8 @@ HeaterSet=blockavg(rawData.VerdampferleistungSollInW,numElAvg);
 
 %% Estimates Resistive Heating at each section in W
 % Uses Current and estimated Resistance of each Section
-res_Heating=zeros(numPoints,10);
-for i=1:10
+res_Heating=zeros(numPoints,numSect);
+for i=1:numSect
     res_Heating(:,i)=calc_elPower(Current,Temp_wall(:,i),sect_lenght(i));
 end
 
@@ -160,22 +161,22 @@ Efficinecy=MassFlow.*(Enthalpy_IO(:,2)-Enthalpy_IO(:,1))./HeaterPower;
 
 %% enthalpy calculations in kJ/kg
 %Enthalpy at each position
-Enthalpy=zeros(numPoints,10);
-for j=1:10
+Enthalpy=zeros(numPoints,numSect);
+for j=1:numSect
     Enthalpy(:,j)=Enthalpy_IO(:,1)+...
         (sum(res_Heating(:,1:(j-1)),2)+res_Heating(:,j).*pos_frac(j))./(MassFlow*1000);
 end
 
 %% fluid temperature calculation
-Temp_fluid=zeros(numPoints,10);
+Temp_fluid=zeros(numPoints,numSect);
 if ispc
-    for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
+    for j=1:numSect %needs to be looped refprop/XSteam don't accept vectors
         for i=1:numPoints
             Temp_fluid(i,j)=refpropm('T','P',Pressure(i,j)*100,'H',Enthalpy(i,j)*1000,'Water')-273.15;
         end
     end
 else
-    for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
+    for j=1:numSect %needs to be looped refprop/XSteam don't accept vectors
         for i=1:numPoints
             Temp_fluid(i,j)=XSteam('T_ph',Pressure(i,j),Enthalpy(i,j));
         end
@@ -183,16 +184,16 @@ else
 end
 
 %% Computes Vapour Fraction
-VapourFrac=zeros(numPoints,10);
+VapourFrac=zeros(numPoints,numSect);
 if ispc
-    for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
+    for j=1:numSect %needs to be looped refprop/XSteam don't accept vectors
         for i=1:numPoints %%needs to be looped as XSteam doesn't accept vectors
             VapourFrac(i,j)=refpropm('Q','P',Pressure(i,j)*100,'H',Enthalpy(i,j)*1000,'Water');
         end
     end
     VapourFrac(VapourFrac<0)=0; %sets te Vapor Fraction of subcooled water to 0
 else
-    for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
+    for j=1:numSect %needs to be looped refprop/XSteam don't accept vectors
         for i=1:numPoints %%needs to be looped as XSteam doesn't accept vectors
             VapourFrac(i,j)=XSteam('x_ph',Pressure(i,j),Enthalpy(i,j));
         end
@@ -204,10 +205,10 @@ end
 HTC=Heat_flux./(Temp_wall_outside-Temp_fluid);
 
 %% Computation of thermodynamic Properties
-dynVisc=zeros(numPoints,10);
-isobHeatCap=zeros(numPoints,10);
-thermCond=zeros(numPoints,10);
-for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
+dynVisc=zeros(numPoints,numSect);
+isobHeatCap=zeros(numPoints,numSect);
+thermCond=zeros(numPoints,numSect);
+for j=1:numSect %needs to be looped refprop/XSteam don't accept vectors
     for i=1:numPoints
             [dynVisc(i,j), isobHeatCap(i,j), thermCond(i,j)]=therm_Prop_Calc(Pressure(i,j),Temp_fluid(i,j),VapourFrac(i,j));
     end
@@ -219,9 +220,9 @@ Pr_exp=dynVisc.*isobHeatCap./thermCond;
 Re_exp=MassFlow.*d_h./(dynVisc*A_h);
 
 %% Simulation of HTC
-HTC_sim=zeros(numPoints,10);
-HTC_sim_v2=zeros(numPoints,10);
-for j=1:10 %needs to be looped refprop/XSteam don't accept vectors
+HTC_sim=zeros(numPoints,numSect);
+HTC_sim_v2=zeros(numPoints,numSect);
+for j=1:numSect %needs to be looped refprop/XSteam don't accept vectors
     for i=1:numPoints
         if ~VapourFrac(i,j)
             HTC_sim(i,j)=HTC_sim_1P(Pressure(i,j),Temp_wall(i,j),thermCond(i,j),Re_exp(i,j),Pr_exp(i,j),pos_TC_abs(j));

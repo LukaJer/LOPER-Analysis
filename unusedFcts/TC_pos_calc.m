@@ -1,3 +1,4 @@
+%% calculations for TC positions
 
 pos_TC_rel=[18*2 150.3 149.7 149.9 200.5 50.1 49.8 49.4 51.2 49.7 21.4*2];
 for i=1:10

@@ -222,10 +222,12 @@ Re_exp=MassFlow.*d_h./(dynVisc*A_h);
 %% Simulation of HTC
 HTC_sim=zeros(numPoints,numSect);
 HTC_sim_v2=zeros(numPoints,numSect);
+
+
 for j=1:numSect %needs to be looped refprop/XSteam don't accept vectors
     for i=1:numPoints
         if ~VapourFrac(i,j)
-            HTC_sim(i,j)=HTC_sim_1P(Pressure(i,j),Temp_wall(i,j),thermCond(i,j),Re_exp(i,j),Pr_exp(i,j),pos_TC_abs(j));
+            HTC_sim(i,j)=HTC_sim_1P(Re_exp(i,j),Pr_exp(i,j),pos_TC_abs(j),thermCond(i,j));
         else
             HTC_sim(i,j)=HTC_sim_2P(Temp_fluid(i,j),Pressure(i,j),res_Heating(i,j),VapourFrac(i,j),pos_TC_abs(j),MassFlow(i));
             HTC_sim_v2(i,j)=HTC_sim_2P_v2(Pressure(i,j),VapourFrac(i,j),Temp_wall_outside(i,j),MassFlow(i));

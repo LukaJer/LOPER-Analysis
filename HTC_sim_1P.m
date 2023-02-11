@@ -1,64 +1,18 @@
- function HTC=HTC_sim_1P(pressure,temp_wall,thermalCond,Re,Pr,pos)
+ function HTC=HTC_sim_1P(Re,Pr,pos,thermCond)
+ %% Calculation of the 1-phase HTC for laminar flow, const. heat flux on inside wall, annular ring
 d_o=26.4/1000;
 d_i=10/1000;
 d_h=d_o-d_i;
 ratio=d_i/d_o;
-A=((d_o/2)^2-(d_i/2)^2)*pi;
-totallength=0.94;
 
+Nu_FD=1.217*ratio^(-0.781)+0.035*ratio^(-1.091)+4.133; % Fully Developed Flow
 
-if ispc
-    dynVisc_w=refpropm('V','T',temp_wall+273.15,'P',pressure*100,'Water');
-    isobaricHeatCap_w=refpropm('C','T',temp_wall+273.15,'P',pressure*100,'Water');
-    thermalCond_w=refpropm('L','T',temp_wall+273.15,'P',pressure*100,'Water');
-else
-    dynVisc_w=XSteam('my_pT',pressure,temp_wall);
-    isobaricHeatCap_w=XSteam('Cp_pT',pressure,temp_wall)*1000;
-    thermalCond_w=XSteam('tc_pT',pressure,temp_wall);
-end
+B=0.038*ratio^(-0.868)+0.552;
+C=0.007*ratio^(-0.452)-0.426;
+D=-124.8*ratio^(0.023)+62.41;
+z=pos/(d_h*Re*Pr);
+Nu_D=Nu_FD+B*z^C*exp(D*z); %Developing Flow
 
-Pr_wall=dynVisc_w*isobaricHeatCap_w/thermalCond_w;
-
-    if (Re<2300)
-        %% VDI annular, only for const. T!
-        %         Nu_1=3.66+1.2*ratio^(-0.8);
-        %         Nu_2=1.615*(1+0.14*ratio^(-1/2))*(Re*Pr*d_h/totallength)^(1/3);
-        %         Nu_3=(2/(1+22*Pr))^(1/6)*(Re*Pr*d_h/totallength)^(1/2);
-        %         Nu_m=(Nu_1^3+Nu_2^3+Nu_3^3)^(1/3);
-
-        %         Nu=Nu_m*(Pr/Pr_wall)^0.11;
-
-        %% VDI regular tube, for const. q
-        Nu_q_1=4.364;
-        Nu_q_2=1.302*(Re*Pr*d_h/pos)^(1/3);
-        Nu_q_3=0.462*Pr^(1/3)*(Re*d_h/pos)^(1/2);
-        Nu=(Nu_q_1^3+1+(Nu_q_2-1)^3+Nu_q_3^3)^(1/3);
-
-
-    elseif(2300<Re && Re<10000)
-        Nu_1=3.66+1.2*ratio^(-0.8);
-        Nu_2=1.615*(1+0.14*ratio^(-1/2))*(2300*Pr*d_h/totallength)^(1/3);
-        Nu_3=(2/(1+22*Pr))^(1/6)*(2300*Pr*d_h/totallength)^(1/2);
-        Nu_m_L=(Nu_1^3+Nu_2^3+Nu_3^3)^(1/3);
-
-        Re_s=2300*((1+ratio^2)*log(ratio)+(1-ratio^2))/(log(ratio)*(1-ratio)^2);
-        k1=1.07+900/2300-0.63/(1+10*Pr);
-        press_loss=(1.8*log10(Re_s)-1.5)^(-2);
-        Nu_m_T=(press_loss/8*10000*Pr)/(k1+12.7*sqrt(press_loss/8)*(Pr^(2/3)-1))*(1+(d_h/totallength)^(2/3))*0.75*ratio^(-0.17);
-        gamma=(Re-2300)/(10000-2300);
-        Nu_m=(1-gamma)*Nu_m_L+gamma*Nu_m_T;
-
-        Nu=Nu_m*(Pr/Pr_wall)^0.11;
-        
-    elseif(10000<Re)
-        Re_s=Re*((1+ratio^2)*log(ratio)+(1-ratio^2))/(log(ratio)*(1-ratio)^2);
-        press_loss=(1.8*log10(Re_s)-1.5)^(-2);
-        k1=1.07+900/Re-0.63/(1+10*Pr);
-        Nu_m=(press_loss/8*Re*Pr)/(k1+12.7*sqrt(press_loss/8)*(Pr^(2/3)-1))*(1+(d_h/totallength)^(2/3))*0.75*ratio^(-0.17);
-
-        Nu=Nu_m*(Pr/Pr_wall)^0.11;
-    end
-    %
-    HTC=Nu*thermalCond/d_h;
+HTC=Nu_D*thermCond/d_h;
 
 end

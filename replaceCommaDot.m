@@ -1,4 +1,4 @@
-%% Replaces , (comma) with . (dot) in Decimals in the CSV file
+%% Replaces , (comma) with . (dot) and   (tab) with  ;  (semicolon) in Decimals in the CSV file
 Data = uigetfile('*.csv','Select the measurement data');%open file browser
 DataString = fileread(Data);
 DataString = strrep(DataString, ',', '.');

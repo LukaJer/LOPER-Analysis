@@ -1,5 +1,5 @@
 function [dynVisc,isobaricHeatCap,thermalCond] = therm_Prop_Calc(pressure,temp_fluid,VapourFrac)
-%% Calculates dynamic Viscosity, isobaric Heat Capacity and the thermal Conductivity of the fluid at a point
+%% Calculates dynamic Viscosity, isobaric Heat Capacity and the thermal Conductivity of the fluid
 if ispc
 
         dynVisc=refpropm('V','T',temp_fluid+273.15,'P',pressure*100,'Water'); % [Pa*s]

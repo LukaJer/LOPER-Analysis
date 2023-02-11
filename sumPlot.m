@@ -1,12 +1,8 @@
 
-
-%             EditField.Value=MassFlow(time_index); %Durchfluss
-%             EditField_2.Value=EnthalpyInSet(time_index); %Eintrittsenthalpie
-%             EditField_3.Value=HeaterPower(time_index); %Verdampferleistung
-%             EditField_5.Value=Enthalpy_IO(time_index,2)-Enthalpy_IO(time_index,1); %Enthalpieänderung
 close all;
 pos_TC_abs=[18 168.3 318 467.9 668.4 718.5 768.3 817.7 868.9 918.6]/1000;
 
+%% shows plots from steady state export
 % plot(Temp_wall_mean,pos_TC_abs,"-o"); hold on;
 % plot(Temp_wall_outside_mean,pos_TC_abs,"-o");
 % plot(Temp_fluid_mean,pos_TC_abs,"-o");
@@ -38,7 +34,16 @@ pos_TC_abs=[18 168.3 318 467.9 668.4 718.5 768.3 817.7 868.9 918.6]/1000;
 % title('Heat Transfer Coefficient');
 % grid;
 
+%% creates summary table form data
 summary=table(linspace(1,10,10)',round(Temp_wall_mean,3),round(Temp_wall_outside_mean,3), round(Temp_fluid_mean,3),...
     round(Heat_flux_mean/1000,3), round(HTC_mean/1000,3), round(VapourFrac_mean,3));
 summary.Properties.VariableNames={'pos','Temp_wall','Temp_wall_outside', 'Temp_fluid', 'Heat_flux', 'HTC','VapourFrac'};
 table2latex(summary,'summary')
+
+%% creates table with temperatures and temperature diffs
+% temps=table(linspace(1,10,10)',round(Temp_wall_mean,3),round(Temp_wall_outside_mean,3), round(Temp_fluid_mean,3));
+% temps.Properties.VariableNames={'pos','Temp_wall','Temp_wall_outside', 'Temp_fluid'};
+% diff=table(linspace(1,10,10)',round(Temp_wall_mean,3)-round(Temp_wall_outside_mean,3), round(Temp_wall_outside_mean,3)-round(Temp_fluid_mean,3));
+% diff.Properties.VariableNames={'pos','Delta T1','Delta T2'};
+% table2latex(flip(temps),'temps')
+% table2latex(flip(diff),'diff')

@@ -235,9 +235,4 @@ for j=1:numSect %needs to be looped refprop/XSteam don't accept vectors
     end
 end
 
-%% Nusslet Number from LeastSquares Approach
-% x=[5.194725261478277,0.479405851735662,-0.869964261707776,-0.206645169972858];
-% Nu_sim_my=x(1)*Re_exp.^x(2).*Pr_exp.^x(3).*pos_TC_abs.^x(4);
-% HTC_sim_my=Nu_sim_my.*thermCond/d_h;
-
 clear i j

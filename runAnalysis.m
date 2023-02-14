@@ -93,11 +93,11 @@ Temp_wall=blockavg(Temp_wall,numElAvg);
 %% #sections are taken from #columns in Temp_wall
 numPoints=height(Temp_wall); % #time-steps
 numSect=width(Temp_wall); % #sections or #TCs
-timeVect=linspace(0,totalTime,numPoints)'; % creates new time vector 
+timeVect=round(linspace(0,totalTime,numPoints)',1); % creates new time vector 
 
 %% Extracts and smooths pressure
-Pressure_IO(:,1)=blockavg(rawData.DruckVorKRInBar,numElAvg);
-Pressure_IO(:,2)=blockavg(rawData.DruckNachKRInBar,numElAvg);
+Pressure_IO(:,1)=blockavg(rawData.DruckVorKRInBar,numElAvg); % input pressure
+Pressure_IO(:,2)=blockavg(rawData.DruckNachKRInBar,numElAvg); % output pressure
 Pressure=Pressure_IO(:,1)+(Pressure_IO(:,2)-Pressure_IO(:,1)).*pos_TC_abs;
 
 %% Various Computations
@@ -126,8 +126,7 @@ resHeating_sum=sum(res_Heating,2);
 resHeating_corrFac=HeaterPower./resHeating_sum;
 res_Heating=resHeating_corrFac.*res_Heating;
 resHeating_sum=sum(res_Heating,2);
-% calculates heat flux [ W/(m2*K) ]
-Heat_flux=res_Heating./A_section;
+Heat_flux=res_Heating./A_section; % calculates heat flux [ W/(m2*K) ]
 
 thermCond_Steel=1.7*10^-8*Temp_wall.^3-3.1*10^-5*Temp_wall.^2+3.25*10^-2*Temp_wall+7.52;
 Temp_wall_outside=Temp_wall-(r_o*Heat_flux)./(2*thermCond_Steel)+(Heat_flux*r_i^2*r_o)./(thermCond_Steel*(r_o^2-r_i^2))*log(r_o/r_i);
@@ -206,31 +205,27 @@ HTC=Heat_flux./(Temp_wall_outside-Temp_fluid);
 
 %% Computation of thermodynamic Properties
 dynVisc=zeros(numPoints,numSect);
-isobHeatCap=zeros(numPoints,numSect);
+specHeatCap=zeros(numPoints,numSect);
 thermCond=zeros(numPoints,numSect);
 for j=1:numSect %needs to be looped refprop/XSteam don't accept vectors
     for i=1:numPoints
-            [dynVisc(i,j), isobHeatCap(i,j), thermCond(i,j)]=therm_Prop_Calc(Pressure(i,j),Temp_fluid(i,j),VapourFrac(i,j));
+            [dynVisc(i,j), specHeatCap(i,j), thermCond(i,j)]=therm_Prop_Calc(Pressure(i,j),Temp_fluid(i,j),VapourFrac(i,j));
     end
 end
 
 %% Dimensionless Numbers
 Nu_exp=HTC.*d_h./thermCond;
-Pr_exp=dynVisc.*isobHeatCap./thermCond;
-Re_exp=MassFlow.*d_h./(dynVisc*A_h);
+Pr=dynVisc.*specHeatCap./thermCond;
+Re=MassFlow.*d_h./(dynVisc*A_h);
 
 %% Simulation of HTC
 HTC_sim=zeros(numPoints,numSect);
-HTC_sim_v2=zeros(numPoints,numSect);
-
-
 for j=1:numSect %needs to be looped refprop/XSteam don't accept vectors
     for i=1:numPoints
         if ~VapourFrac(i,j)
-            HTC_sim(i,j)=HTC_sim_1P(Re_exp(i,j),Pr_exp(i,j),pos_TC_abs(j),thermCond(i,j));
+            HTC_sim(i,j)=HTC_sim_1P(Re(i,j),Pr(i,j),pos_TC_abs(j),thermCond(i,j));
         else
-            HTC_sim(i,j)=HTC_sim_2P(Temp_fluid(i,j),Pressure(i,j),res_Heating(i,j),VapourFrac(i,j),pos_TC_abs(j),MassFlow(i));
-            HTC_sim_v2(i,j)=HTC_sim_2P_v2(Pressure(i,j),VapourFrac(i,j),Temp_wall_outside(i,j),MassFlow(i));
+            HTC_sim(i,j)=HTC_sim_2P(Temp_fluid(i,j),Pressure(i,j),Heat_flux(i,j),VapourFrac(i,j),pos_TC_abs(j),MassFlow(i));
         end
     end
 end

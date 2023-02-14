@@ -14,9 +14,9 @@ r_cr=0.3e-6;
 if ispc
     rho1=refpropm('D','P',pressure*100,'Q',0,'Water'); %[kg/m^3]
     rho2=refpropm('D','P',pressure*100,'Q',1,'Water'); %[kg/m^3]
-    T_sat=refpropm('T','P',pressure*100,'Water'); %[K]
-    surfTen=refpropm('I','P',pressure*100,'Water'); %[N/m]
-    vaprEnth=refpropm('Y','P',pressure*100,'Water'); %[J/kg]
+    T_sat=refpropm('T','P',pressure*100,'Q',0,'Water'); %[K]
+    surfTen=refpropm('I','P',pressure*100,'Q',0,'Water'); %[N/m]
+    vaprEnth=refpropm('Y','P',pressure*100,'Q',0','Water'); %[J/kg]
 else
     rho1=XSteam('rhoL_p',pressure); %[kg/m^3]
     rho2=XSteam('rhoV_p',pressure); %[kg/m^3]

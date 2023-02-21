@@ -2,6 +2,7 @@
 close all;
 pos_TC_abs=[18 168.3 318 467.9 668.4 718.5 768.3 817.7 868.9 918.6]/1000;
 
+
 %% shows plots from steady state export
 % plot(Temp_wall_mean,pos_TC_abs,"-o"); hold on;
 % plot(Temp_wall_outside_mean,pos_TC_abs,"-o");
@@ -35,9 +36,10 @@ pos_TC_abs=[18 168.3 318 467.9 668.4 718.5 768.3 817.7 868.9 918.6]/1000;
 % grid;
 
 %% creates summary table form data
+HTC_dev=(HTC_sim_mean-HTC_mean)./HTC_mean;
 summary=table(linspace(1,10,10)',round(Temp_wall_mean,3),round(Temp_wall_outside_mean,3), round(Temp_fluid_mean,3),...
-    round(Heat_flux_mean/1000,3), round(HTC_mean/1000,3), round(VapourFrac_mean,3));
-summary.Properties.VariableNames={'pos','Temp_wall','Temp_wall_outside', 'Temp_fluid', 'Heat_flux', 'HTC','VapourFrac'};
+    round(Heat_flux_mean/1000,3), round(VapourFrac_mean,3),round(HTC_mean/1000,3),round(HTC_sim_mean/1000,3),HTC_dev);
+summary.Properties.VariableNames={'pos','Temp_wall','Temp_wall_outside', 'Temp_fluid', 'Heat_flux','VapourFrac','HTC_meas','HTC_sim','HTC_dev'};
 table2latex(summary,'summary')
 
 %% creates table with temperatures and temperature diffs
@@ -47,3 +49,4 @@ table2latex(summary,'summary')
 % diff.Properties.VariableNames={'pos','Delta T1','Delta T2'};
 % table2latex(flip(temps),'temps')
 % table2latex(flip(diff),'diff')
+

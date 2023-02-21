@@ -1,4 +1,4 @@
-function HTC = HTC_sim_2P(temp_fluid,pressure,heat_flux,VapourFrac,position,massflow)
+function HTC = HTC_sim_2P(pressure,heat_flux,VapourFrac,position,massflow)
 %% Two-Phase HTC Calculation as per VDI Wärmeatlas [W/m^2 K]
 
 D_h=0.0164; % d_o-d_i in m

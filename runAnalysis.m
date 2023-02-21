@@ -209,9 +209,13 @@ specHeatCap=zeros(numPoints,numSect);
 thermCond=zeros(numPoints,numSect);
 for j=1:numSect %needs to be looped refprop/XSteam don't accept vectors
     for i=1:numPoints
-            [dynVisc(i,j), specHeatCap(i,j), thermCond(i,j)]=therm_Prop_Calc(Pressure(i,j),Temp_fluid(i,j),VapourFrac(i,j));
+        if ~VapourFrac(i,j) % only for 1-Phase
+            [dynVisc(i,j), specHeatCap(i,j), thermCond(i,j)]=therm_Prop_Calc(Pressure(i,j),Temp_fluid(i,j));
+        end
     end
 end
+
+
 
 %% Dimensionless Numbers
 Nu_exp=HTC.*d_h./thermCond;

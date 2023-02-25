@@ -16,6 +16,14 @@ else
     end
     clear addons
 end
+if ~contains(struct2array(ver), 'Statistics and Machine Learning Toolbox')
+        msgbox(["ERROR!";" Statistics and Machine Learning Toolbox reqired"],"Error","error");
+        return;
+end
+if ~contains(struct2array(ver), 'Image Processing Toolbox')
+        msgbox(["ERROR!";"Image Processing Toolbox required"],"Error","error");
+        return;
+end
 
 
 [File,Path] = uigetfile('*.csv','Select the measurement data');%open file browser
@@ -229,7 +237,7 @@ for j=1:numSect %needs to be looped refprop/XSteam don't accept vectors
         if ~VapourFrac(i,j)
             HTC_sim(i,j)=HTC_sim_1P(Re(i,j),Pr(i,j),pos_TC_abs(j),thermCond(i,j));
         else
-            HTC_sim(i,j)=HTC_sim_2P(Temp_fluid(i,j),Pressure(i,j),Heat_flux(i,j),VapourFrac(i,j),pos_TC_abs(j),MassFlow(i));
+            HTC_sim(i,j)=HTC_sim_2P(Pressure(i,j),Heat_flux(i,j),VapourFrac(i,j),pos_TC_abs(j),MassFlow(i));
         end
     end
 end

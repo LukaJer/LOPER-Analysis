@@ -1,5 +1,5 @@
  function HTC=HTC_sim_1P(Re,Pr,pos,thermCond)
- %% Calculation of the 1-phase HTC for laminar flow, const. heat flux on inside wall, annular ring [W/(m K)]
+ %% Calculation of the 1-phase HTC for laminar flow, const. heat flux on inside wall, annular ring [W/(m2 K)]
 d_o=26.4/1000;
 d_i=10/1000;
 d_h=d_o-d_i;

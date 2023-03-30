@@ -1,6 +1,10 @@
 %% Converts multi run TXT file into single run CSV files and replaces , (comma) with . (dot) 
 clear;
-Data = uigetfile('*.txt','Select the measurement data');%open file browser
+minDur=60; % minimum Duration of measurement [s]
+
+[File,Path] = uigetfile('*.txt','Select the measurement data');%open file browser
+full_Path=fullfile(Path,File);
+
 varNames={'deltaTInS','DurchflussInL_min','EintrittsenthalpieInKJ_kg','LeistungDerVorheizungInW',...
     'VerdampferleistungSollInW','GesamtspannungInV','GesamtstromInA','TemperaturImBeh_lterIn_C',...
     'DruckVorVerdampferrohrInBar','TemperaturVorVerdampferrohrIn_C','Rohrwandtemperatur1In_C',...
@@ -19,14 +23,23 @@ varNames={'deltaTInS','DurchflussInL_min','EintrittsenthalpieInKJ_kg','LeistungD
     'RohrinnentemperaturKR1In_C','RohrinnentemperaturKR2In_C','RohrinnentemperaturKR3In_C','RohrinnentemperaturKR4In_C',...
     'RohrinnentemperaturKR5In_C','RohrinnentemperaturKR6In_C','RohrinnentemperaturKR7In_C','RohrinnentemperaturKR8In_C',...
     'RohrinnentemperaturKR9In_C','RohrinnentemperaturKR10In_C','TemperaturKreisringaustrittIn_C','DruckNachKRInBar','UmgebungstemperaturKRIn_C'};
-rawData=readtable(Data,'Delimiter','tab','DecimalSeparator',',');
+rawData=readtable(full_Path,'Delimiter','tab','DecimalSeparator',',');
 rawData.Properties.VariableNames=varNames;
 NewStart=find(rawData.deltaTInS==0);
-inName=Data(1:end-4);
+inName=File(1:end-4);
 NewStart(end+1)=height(rawData)+1;
+j=1;
 for i=1:length(NewStart)-1
-    name= inName + "_0" + i + ".csv";
-writetable(rawData((NewStart(i):NewStart(i+1)-1),:),name,"Delimiter",";")
+    if rawData.deltaTInS(NewStart(i+1)-1)>minDur
+        if j<10
+            name= inName + "_0" + j + ".csv";
+        else
+            name= inName + "_" + j + ".csv";
+        end
+        name=Path + name;
+        writetable(rawData((NewStart(i):NewStart(i+1)-1),:),name,'Delimiter',';')
+        j=j+1;
+    end
 end
-
+msgbox(sprintf('Split into %i files',j-1));
 

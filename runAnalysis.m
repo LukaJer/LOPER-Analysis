@@ -72,7 +72,7 @@ clear answer
 numElAvg=1/0.1*deltaT;
 
 
-%% Definitions
+%% Definitions/Dimensions
 pos_TC_rel=[18 150.3 149.7 149.9 200.5 50.1 49.8 49.4 51.2 49.7]/1000; % [m]
 pos_TC_abs=[18 168.3 318 467.9 668.4 718.5 768.3 817.7 868.9 918.6]/1000; % [m]
 sect_lenght=[93.15 150 149.8 175.2 125.3 49.95 49.6 50.3 50.45 46.25]/1000; % [m]
@@ -86,21 +86,18 @@ d_hw=10/1000; % heater outer wall
 d_h=d_gw-d_hw;
 ratio=d_hw/d_gw;
 A_h=((d_gw/2)^2-(d_hw/2)^2)*pi;
-totallength=0.94;
-
-totalTime=max(rawData.deltaTInS);
-
 
 
 %% Extracts KR temperature Data
 Temp_wall=table2array(rawData(:,56:66)); 
-Temp_wall(:,2)=[];
+Temp_wall(:,2)=[]; % remove readings from broken TC
 Temp_wall=flip(Temp_wall,2); % flips so that table position matches TC position (1st column = bottom TC)
 Temp_wall=blockavg(Temp_wall,numElAvg);
 
 %% #sections are taken from #columns in Temp_wall
 numPoints=height(Temp_wall); % #time-steps
 numSect=width(Temp_wall); % #sections or #TCs
+totalTime=max(rawData.deltaTInS);
 timeVect=round(linspace(0,totalTime,numPoints)',1); % creates new time vector 
 
 %% Extracts and smooths pressure
@@ -108,21 +105,19 @@ Pressure_IO(:,1)=blockavg(rawData.DruckVorKRInBar,numElAvg); % input pressure
 Pressure_IO(:,2)=blockavg(rawData.DruckNachKRInBar,numElAvg); % output pressure
 Pressure=Pressure_IO(:,1)+(Pressure_IO(:,2)-Pressure_IO(:,1)).*pos_TC_abs;
 
-%% Various Computations
-
-% Mass flow [kg/s]
+%% Mass flow [kg/s]
 densityH20=1;
 MassFlow=blockavg(rawData.DurchflussInL_min,numElAvg);
 MassFlow=densityH20*(MassFlow/60); % kg/s
 clear densityH20
 
-% Heater Power [W]
+%% Heater Power [W]
 Voltage=blockavg(rawData.SpannungsabfallKRInV,numElAvg);
 Current=blockavg(rawData.GesamtstromInA,numElAvg);
 HeaterPower=Current.*Voltage; % W
 HeaterSet=blockavg(rawData.VerdampferleistungSollInW,numElAvg);
 
-%% Estimates Resistive Heating at each section in W
+% Estimates Resistive Heating at each section in W
 % Uses Current and estimated Resistance of each Section
 res_Heating=zeros(numPoints,numSect);
 for i=1:numSect
@@ -136,6 +131,7 @@ res_Heating=resHeating_corrFac.*res_Heating;
 resHeating_sum=sum(res_Heating,2);
 Heat_flux=res_Heating./A_section; % calculates heat flux [ W/(m2*K) ]
 
+%% Calculates Temperature on other outer Wall
 thermCond_Steel=1.7*10^-8*Temp_wall.^3-3.1*10^-5*Temp_wall.^2+3.25*10^-2*Temp_wall+7.52;
 Temp_wall_outside=Temp_wall-(r_o*Heat_flux)./(2*thermCond_Steel)+(Heat_flux*r_i^2*r_o)./(thermCond_Steel*(r_o^2-r_i^2))*log(r_o/r_i);
 

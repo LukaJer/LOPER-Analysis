@@ -93,6 +93,7 @@ size=[1249,451,799,420]; % window size and positions
 
 %% Draw figures
 
+%outer Wall Temperature
 figure(Position=size)
 plot(pos_TC_abs,Temp_wall_outside_mean(:,2:end),'-o','LineWidth',2)
 title('Temperature Wall (outside)')
@@ -101,6 +102,7 @@ xlabel('Position')
 legend(identifier,Location='southeast');
 grid;
 
+%fluid Temperature
 figure(Position=size)
 plot(pos_TC_abs,Temp_fluid_mean(:,2:end),'-o','LineWidth',2)
 title('Temperature Fluid')
@@ -109,6 +111,7 @@ xlabel('Position')
 legend(identifier,Location='southeast');
 grid;
 
+%HTC
 figure(Position=size)
 plot(pos_TC_abs,HTC_mean(:,2:end)/1000,'-o','LineWidth',2)
 title('Heat Transfer Coefficient');
@@ -117,6 +120,7 @@ xlabel('Position')
 legend(identifier,Location='southeast');
 grid;
 
+%Vapour Fraction
 figure(Position=size)
 plot(pos,VapourFrac_mean(:,2:end),'-o','LineWidth',2)
 title('Vapor Fraction')
@@ -124,6 +128,7 @@ xlabel('Position')
 legend(identifier,Location='southeast');
 grid;
 
+%Heat Flux
 figure(Position=size)
 plot(pos_TC_abs,Heat_flux_mean(:,2:end)/1000,'-o','LineWidth',2)
 title('Heat Flux')
@@ -132,6 +137,7 @@ xlabel('Position')
 legend(identifier,Location='southeast');
 grid;
 
+%Temperature delta over wall
 figure(Position=size)
 plot(pos_TC_abs,Temp_delta_wall(:,2:end),'-o','LineWidth',2)
 title('Temperature Delta along Wall')
@@ -140,6 +146,7 @@ xlabel('Position')
 legend(identifier,Location='southeast');
 grid;
 
+%Temperature delta Wall fluid
 figure(Position=size)
 plot(pos_TC_abs,Temp_delta_fluid(:,2:end),'-o','LineWidth',2)
 title('Temperature Delta Wall - Fluid')

@@ -10,9 +10,4 @@ blockSize = [numEl, 1];
 meanFilterFunction = @(theBlockStructure) mean(theBlockStructure.data(:));
 shrinkedMat = blockproc(matrix, blockSize, meanFilterFunction);
 
-
-% s = size(matrix);
-% matrix=[matrix;nan(mod(-s(1),numEl),s(2))]; % fills up with NaN
-% out = squeeze(nanmean(reshape(matrix,numEl,[],s(2))));
-
 end

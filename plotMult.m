@@ -96,9 +96,9 @@ size=[1249,451,799,420]; % window size and positions
 %outer Wall Temperature
 figure(Position=size)
 plot(pos_TC_abs,Temp_wall_outside_mean(:,2:end),'-o','LineWidth',2)
-title('Temperature Wall (outside)')
-ylabel('°C','rotation',0,'FontSize',12)
-xlabel('Position')
+title('Temperature Wall (outer)')
+ylabel('Outer Wall Temperature [°C]','FontSize',12)
+xlabel('Position [m]')
 legend(identifier,Location='southeast');
 grid;
 
@@ -106,8 +106,17 @@ grid;
 figure(Position=size)
 plot(pos_TC_abs,Temp_fluid_mean(:,2:end),'-o','LineWidth',2)
 title('Temperature Fluid')
-ylabel('°C','rotation',0,'FontSize',12)
-xlabel('Position')
+ylabel('Fluid Temperature [°C]','FontSize',12)
+xlabel('Position [m]')
+legend(identifier,Location='southeast');
+grid;
+
+%Enthalpy
+figure(Position=size)
+plot(pos_TC_abs,Enthalpy_mean(:,2:end),'-o','LineWidth',2)
+title('Enthalpy')
+ylabel('Enthalpy $$\left[\frac{kJ}{kg}\right]$$',Interpreter='latex',FontSize=12)
+xlabel('Position [m]')
 legend(identifier,Location='southeast');
 grid;
 
@@ -115,16 +124,17 @@ grid;
 figure(Position=size)
 plot(pos_TC_abs,HTC_mean(:,2:end)/1000,'-o','LineWidth',2)
 title('Heat Transfer Coefficient');
-ylabel('$$\frac{kW}{m^{2}K}$$',Interpreter='latex',Rotation=0,FontSize=12)
-xlabel('Position')
+ylabel('HTC $$\left[\frac{kW}{m^{2}K}\right]$$',Interpreter='latex',FontSize=12)
+xlabel('Position [m]')
 legend(identifier,Location='southeast');
 grid;
 
 %Vapour Fraction
 figure(Position=size)
-plot(pos,VapourFrac_mean(:,2:end),'-o','LineWidth',2)
+plot(pos_TC_abs,VapourFrac_mean(:,2:end),'-o','LineWidth',2)
 title('Vapor Fraction')
-xlabel('Position')
+ylabel('Vapour Fraction [-]','FontSize',12)
+xlabel('Position [m]')
 legend(identifier,Location='southeast');
 grid;
 
@@ -132,8 +142,8 @@ grid;
 figure(Position=size)
 plot(pos_TC_abs,Heat_flux_mean(:,2:end)/1000,'-o','LineWidth',2)
 title('Heat Flux')
-ylabel('$$\frac{kW}{m^2}$$',Interpreter='latex',Rotation=0,FontSize=12)
-xlabel('Position')
+ylabel('Heat Flux $$ \left[\frac{kW}{m^2}\right]$$',Interpreter='latex',FontSize=12)
+xlabel('Position [m]')
 legend(identifier,Location='southeast');
 grid;
 
@@ -141,8 +151,8 @@ grid;
 figure(Position=size)
 plot(pos_TC_abs,Temp_delta_wall(:,2:end),'-o','LineWidth',2)
 title('Temperature Delta along Wall')
-ylabel('$$K$$',Interpreter='latex',Rotation=0,FontSize=12)
-xlabel('Position')
+ylabel('Temperature Delta $$[K]$$',Interpreter='latex',FontSize=12)
+xlabel('Position [m]')
 legend(identifier,Location='southeast');
 grid;
 
@@ -150,8 +160,8 @@ grid;
 figure(Position=size)
 plot(pos_TC_abs,Temp_delta_fluid(:,2:end),'-o','LineWidth',2)
 title('Temperature Delta Wall - Fluid')
-ylabel('$$K$$',Interpreter='latex',Rotation=0,FontSize=12)
-xlabel('Position')
+ylabel('Temperature Delta $$[K]$$',Interpreter='latex',FontSize=12)
+xlabel('Position [m]')
 legend(identifier,Location='southeast');
 grid;
 
@@ -167,11 +177,11 @@ grid;
 % plot(Enthalpy_mean(:,i),HTC_mean(:,i)/1000,'-o','LineWidth',2)
 % end
 % title('Heat Transfer Coefficient');
-% ylabel('$$\frac{kW}{m^{2}K}$$',Interpreter='latex',Rotation=0,FontSize=12)
-% xlabel('Enthalpy in $$\frac{kJ}{kg}$$',Interpreter='latex',Rotation=0,FontSize=12)
+% ylabel('HTC $$\left[\frac{kW}{m^{2}K}\right]$$',Interpreter='latex',FontSize=12)
+% xlabel('Enthalpy $$\left[\frac{kJ}{kg}\right]$$',Interpreter='latex',FontSize=12)
 % legend(identifier,Location='southeast');
 % grid;
 % hold off;
-%
+% 
 % EnthlHTC=[Enthalpy_all HTC_all];
 % EnthlHTC=sortrows(EnthlHTC)

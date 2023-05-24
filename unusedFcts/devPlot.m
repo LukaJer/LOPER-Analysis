@@ -24,8 +24,8 @@ semilogy(pos_TC_abs,HTC_sim_mean(:,2),'-x','LineWidth',2,'Color',"#0072BD");
 semilogy(pos_TC_abs,HTC_sim_mean(:,3),'-x','LineWidth',2,'Color',"#D95319"); 
 semilogy(pos_TC_abs,HTC_sim_mean(:,4),'-x','LineWidth',2,'Color',"#EDB120"); 
 semilogy(pos_TC_abs,HTC_sim_mean(:,5),'-x','LineWidth',2,'Color',"#7E2F8E"); 
-ylabel('$$\frac{kW}{m^{2}K}$$',Interpreter='latex',Rotation=0,FontSize=12);
-xlabel('Position')
+ylabel('HTC $$\left[\frac{kW}{m^{2}K}\right]$$',Interpreter='latex',FontSize=12)
+xlabel('Position [m]')
 ylim('padded')
 hold off;
 grid on
@@ -36,8 +36,8 @@ size=[1249,451,799,420]; % window size and positions
 figure(Position=size)
 %stem(pos_TC_abs,HTC_dev(:,2:end),'-_','LineWidth',1.5)
 bar(pos_TC_abs,HTC_dev(:,2:end))
-ylabel('$$\zeta$$',Interpreter='latex',Rotation=0,FontSize=15);
-xlabel('Position')
+ylabel('Deviation $$\left[\zeta\right]$$',Interpreter='latex',FontSize=15);
+xlabel('Position [m]')
 legend ("a","b","c","d")
 axis padded
 grid on
